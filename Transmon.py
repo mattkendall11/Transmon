@@ -27,3 +27,30 @@ class Transmon:
         # Other calculations, derivatives, and transformations
 
         return e, v
+
+
+'''
+testing egtrans function, delete when complete
+'''
+
+
+def egtrans(ng, EjEc, cutoff):
+    if cutoff <= 1:
+        raise ValueError("Cutoff must be greater than 1")
+
+    # Sparse matrix h
+    h = 4 * (np.arange(-cutoff, cutoff + 1) - ng) ** 2
+
+    # Sparse matrix hv
+    hv = -np.eye(2 * cutoff + 1)
+    hv[np.diag_indices(2 * cutoff)] = 0.0
+
+    # Sparse matrix n
+    n = np.diag(np.arange(-cutoff, cutoff + 1))
+
+    # Eigenvalue computation
+    e, v = eigvals(h + EjEc * hv / 2, overwrite_a=True)
+
+    # Other calculations, derivatives, and transformations
+
+    return e, v  #
