@@ -14,10 +14,10 @@ class TransmonInterpolation:
         self.energy, self.coupling = self.calculate_transmon_interpolation()
 
     def calculate_transmon_interpolation(self):
-        h = diags([4 * (np.arange(-self.cutoff, self.cutoff + 1) - self.ng) ** 2], 0)
+        h = diags([4 * (np.arange(-self.cutoff, self.cutoff + 1) - self.ng) ** 2], [0])
         hv = spdiags([-np.ones(2 * self.cutoff), -np.ones(2 * self.cutoff)], [1, -1],
                      (2 * self.cutoff + 1, 2 * self.cutoff + 1))
-        n = diags([np.arange(-self.cutoff, self.cutoff + 1)], 0)
+        n = diags([np.arange(-self.cutoff, self.cutoff + 1), np.arange(-self.cutoff, self.cutoff)], [0, -1])
         e, v = eigs(h + self.EjEc * hv / 2, k=2 * self.cutoff + 1)
         o = np.argsort(e)
         e2 = e[o]
