@@ -57,4 +57,3 @@ def egtrans(ng, EjEc, cutoff):
 
 
 
-

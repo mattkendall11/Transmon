@@ -2,78 +2,105 @@
 adapted from the plots files provided by andreas
 '''
 
-from Transmon import TransmonInterpolation
 import numpy as np
-
+import matplotlib.pyplot as plt
+from itertools import chain
+from test import egtrans
+from scipy.linalg import eigh
+'''
+define variables
+'''
+num = 7
 fc = 7500
-clevels = 7
-ttlevels = 7
-
-tplevels = 7
+clevels = num
+ttlevels = num
+tplevels = num
 EJp = 15000
 ECp = 150
 EJt = 20000
 ECt = 200
 
-# Create TransmonInterpolation instances for probe (tp) and target (tt)
-tp = TransmonInterpolation(0.5, EJp / ECp, 15)
-tt = TransmonInterpolation(0.5, EJt / ECt, 15)
+ec, ej = ECp/1000, EJp/1000
 
-# Initialize the cavity-transmon Hamiltonian matrix in an empty matrix
-M = np.zeros((tplevels * ttlevels * clevels, tplevels * ttlevels * clevels))
+tp = 1000*ec*egtrans(0.5, ej/ec, 15)[0][0:tplevels]
 
-# Fill in energies on the diagonal of bare transmon-cavity states
+ec, ej = ECt/1000, EJt/1000
+
+tt = 1000*ec*egtrans(0.5,ej/ec,15)[0][0:ttlevels]
+
+M = np.zeros((tplevels*ttlevels*clevels, tplevels * ttlevels *clevels))
+
 for ip in range(tplevels):
     for it in range(ttlevels):
         for ic in range(clevels):
-            n = ip * ttlevels * clevels + it * clevels + ic
-            M[n, n] = tp.energy_interp(ip, EJp / ECp) + tt.energy_interp(it, EJt / ECt) + ic * fc
+            n = ip * ttlevels * clevels + it *clevels + ic
+            M[n,n] = tp[ip] + tt[it] + ic*fc
 
-# Calculate eigenvalues and eigenvectors
-eigenvalues, eigenvectors = np.linalg.eig(M)
+eigenvalues, eigenvectors = eigh(M)
 
-# Define the pair function to identify interested elements
-def pair_function(i, j):
-    return np.isclose(eigenvalues[i] - eigenvalues[j], tp.energy_interp(1, EJp / ECp)) and np.isin(eigenvalues[j], tt.energy[0])
+eigenvectors, eigenvalues = eigenvectors[::-1], eigenvalues[::-1]
 
-# Use pair function to select pairs
-pairs = [(i, j) for i in range(tplevels * ttlevels * clevels) for j in range(tplevels * ttlevels * clevels) if pair_function(i, j)]
+pairs = []
 
-# Define the interaction terms for the off-diagonal elements
-ME = np.zeros_like(M)
-g = 1 # Define your g value here
-for ip in range(tplevels):
-    for it in range(ttlevels):
-        for ic in range(clevels):
-            n = ip * ttlevels * clevels + it * clevels + ic
-            for jp in range(tplevels):
-                for jt in range(ttlevels):
-                    for jc in range(clevels):
-                        m = jp * ttlevels * clevels + jt * clevels + jc
-                        if jp == ip and jt == it + 1 and jc == ic - 1:
-                            ME[n, m] = np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** 0.25 * g * np.sqrt(jc + 1)
-                        elif jp == ip and jt == it - 1 and jc == ic + 1:
-                            ME[n, m] = np.sqrt(it / 2) * (EJt / (8 * ECt)) ** 0.25 * g * np.sqrt(jc)
-                        elif jp == ip + 1 and jt == it and jc == ic - 1:
-                            ME[n, m] = np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** 0.25 * g * np.sqrt(jc + 1)
-                        elif jp == ip - 1 and jt == it and jc == ic + 1:
-                            ME[n, m] = np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** 0.25 * g * np.sqrt(jc)
+for i in range(tplevels*ttlevels*clevels):
+    for j in range(tplevels*ttlevels*clevels):
+        if(
+            np.round(eigenvalues[i] - eigenvalues[j],5) ==np.round(tp[1],5) and
+            eigenvalues[j] in tt
+        ):
+            pairs.append((i,j))
 
-M2 = M + ME
 
-# Plot the transitions of interest
-import matplotlib.pyplot as plt
+print(pairs)
 
-indices = [tt.energy[0].index(eigenvalues[pair[1]]) for pair in pairs]
-colors = ['Green', 'Brown', 'Red', 'Gray', 'Blue', 'Orange', 'Purple', 'LightBlue', 'Yellow', 'Black', 'LightPurple', 'Pink', 'LightBrown', 'LightBrown', 'LightGreen', 'LightGray']
 
-plt.figure(figsize=(12, 8))
-for i, idx in enumerate(indices):
-    plt.plot(g, eigenvalues[pairs[i][0]] - eigenvalues[pairs[i][1]], label=f"|000> -> |{i}00>", color=colors[i])
+def offdiagonal(g):
+    M2 = np.copy(M)
 
-plt.xlabel("Coupling g strength (MHz)", fontsize=25)
-plt.ylabel("Probe transition |0> -> |1> (MHz)", fontsize=25)
-plt.title(f"Transition shifts of the probe in a {tplevels} lvl probe, {ttlevels} lvl target, {clevels} lvl cavity |P,T,C> Interaction system for difference state of the target", fontsize=25)
-plt.legend()
-plt.grid(True)
-plt.show()
+    # Nested loops to update M2 based on the given conditions
+    for ip in range(tplevels):
+        for it in range(ttlevels):
+            for ic in range(clevels):
+                n = ip * ttlevels * clevels + it * clevels + ic
+                for jp in range(tplevels):
+                    for jt in range(ttlevels):
+                        for jc in range(clevels):
+                            m = jp * ttlevels * clevels + jt * clevels + jc
+
+                            # Approximation for the interaction terms
+                            ME = (
+                                    (jp == ip) * (jt == it + 1) * (jc == ic - 1) *
+                                    np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g * np.sqrt(jc + 1) +
+                                    (jp == ip) * (jt == it - 1) * (jc == ic + 1) *
+                                    np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g * np.sqrt(jc) +
+                                    (jt == it) * (jp == ip + 1) * (jc == ic - 1) *
+                                    np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g * np.sqrt(jc + 1) +
+                                    (jt == it) * (jp == ip - 1) * (jc == ic + 1) *
+                                    np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g * np.sqrt(jc)
+                            )
+
+                            M2[n, m] += ME
+    '''
+    wordking up to here
+    '''
+
+
+
+    eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
+    eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
+    # Define the eigenvalue differences for specific transitions
+    differences = [
+        eigenvalues[pairs[ttlevels][0]] - eigenvalues[pairs[ttlevels][1]],
+        eigenvalues_M2[pairs[ttlevels][0]] - eigenvalues_M2[pairs[ttlevels][1]],
+        eigenvalues_M2[pairs[ttlevels - 1][0]] - eigenvalues_M2[pairs[ttlevels - 1][1]],
+        eigenvalues_M2[pairs[ttlevels - 2][0]] - eigenvalues_M2[pairs[ttlevels - 2][1]],
+        eigenvalues_M2[pairs[ttlevels - 3][0]] - eigenvalues_M2[pairs[ttlevels - 3][1]],
+        eigenvalues_M2[pairs[ttlevels - 4][0]] - eigenvalues_M2[pairs[ttlevels - 4][1]],
+        eigenvalues_M2[pairs[ttlevels - 5][0]] - eigenvalues_M2[pairs[ttlevels - 5][1]]
+    ]
+    return differences
+
+g_values = np.linspace(0,150,150)
+push_vals = []
+for g in g_values:
+    push_vals.append(offdiagonal(g))
