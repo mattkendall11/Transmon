@@ -80,18 +80,15 @@ def offdiagonal(g):
                             )
 
                             M2[n, m] += ME
-    '''
-    wordking up to here
-    '''
-
 
 
     eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
     eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
+    print(len(eigenvalues_M2), len(pairs))
     # Define the eigenvalue differences for specific transitions
     differences = [
-        eigenvalues[pairs[ttlevels][0]] - eigenvalues[pairs[ttlevels][1]],
-        eigenvalues_M2[pairs[ttlevels][0]] - eigenvalues_M2[pairs[ttlevels][1]],
+        #eigenvalues[pairs[ttlevels][0]] - eigenvalues[pairs[ttlevels][1]],
+        #eigenvalues_M2[pairs[ttlevels][0]] - eigenvalues_M2[pairs[ttlevels][1]],
         eigenvalues_M2[pairs[ttlevels - 1][0]] - eigenvalues_M2[pairs[ttlevels - 1][1]],
         eigenvalues_M2[pairs[ttlevels - 2][0]] - eigenvalues_M2[pairs[ttlevels - 2][1]],
         eigenvalues_M2[pairs[ttlevels - 3][0]] - eigenvalues_M2[pairs[ttlevels - 3][1]],
@@ -100,7 +97,10 @@ def offdiagonal(g):
     ]
     return differences
 
-g_values = np.linspace(0,150,150)
+g_values = np.linspace(0,5,5)
 push_vals = []
 for g in g_values:
     push_vals.append(offdiagonal(g))
+print(push_vals)
+plt.plot(g_values, push_vals)
+plt.show()
