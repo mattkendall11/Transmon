@@ -101,7 +101,7 @@ g_values = np.linspace(0,150,151)
 push_vals = []
 for g in g_values:
     push_vals.append(offdiagonal(g))
-
+push_vals = np.array(push_vals)
 plt.plot(g_values, push_vals)
 plt.legend()
 plt.show()
