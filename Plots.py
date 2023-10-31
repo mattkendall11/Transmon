@@ -97,10 +97,11 @@ def offdiagonal(g):
     ]
     return differences
 
-g_values = np.linspace(0,5,5)
+g_values = np.linspace(0,150,151)
 push_vals = []
 for g in g_values:
     push_vals.append(offdiagonal(g))
-print(push_vals)
+
 plt.plot(g_values, push_vals)
+plt.legend()
 plt.show()
