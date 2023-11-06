@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from itertools import chain
 from test import egtrans
 from scipy.linalg import eigh
+from tqdm.auto import tqdm
 '''
 define variables
 '''
@@ -51,8 +52,6 @@ for i in range(tplevels*ttlevels*clevels):
             pairs.append((i,j))
 
 
-print(pairs)
-
 
 def offdiagonal(g):
     M2 = np.copy(M)
@@ -84,7 +83,6 @@ def offdiagonal(g):
 
     eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
     eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
-    print(len(eigenvalues_M2), len(pairs))
     # Define the eigenvalue differences for specific transitions
     differences = [
         #eigenvalues[pairs[ttlevels][0]] - eigenvalues[pairs[ttlevels][1]],
@@ -97,11 +95,19 @@ def offdiagonal(g):
     ]
     return differences
 
+
+labels = [rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$', rf'|04$\rangle - |14\rangle$',
+          rf'|05$\rangle - |15\rangle$', rf'|06$\rangle - |16\rangle$']
 g_values = np.linspace(0,150,151)
 push_vals = []
-for g in g_values:
+for g in tqdm(g_values):
     push_vals.append(offdiagonal(g))
 push_vals = np.array(push_vals)
-plt.plot(g_values, push_vals)
+push_vals = push_vals.T
+for i in range(5):
+    plt.plot(g_values, push_vals[i], label = labels[i])
+plt.title('transition differences')
+plt.xlabel('coupling constant,g')
+plt.ylabel('MHz')
 plt.legend()
 plt.show()

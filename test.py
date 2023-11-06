@@ -1,4 +1,8 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from itertools import chain
+from scipy.linalg import eigh
+from tqdm.auto import tqdm
 
 def egtrans(ng, EjEc, cutoff):
     if cutoff <= 1:
@@ -55,5 +59,79 @@ def egtrans(ng, EjEc, cutoff):
     # Return results
     return e2 - e2[0], de - de[0], g, dg
 
+def return_differences(EJt, ECt, EJp, ECp, g, fc):
+    tplevels = 7
+    ttlevels = 7
+    clevels = 7
 
+    ec, ej = ECp / 1000, EJp / 1000
+
+    tp = 1000 * ec * egtrans(0.5, ej / ec, 15)[0][0:tplevels]
+
+    ec, ej = ECt / 1000, EJt / 1000
+
+    tt = 1000 * ec * egtrans(0.5, ej / ec, 15)[0][0:ttlevels]
+
+    M = np.zeros((tplevels * ttlevels * clevels, tplevels * ttlevels * clevels))
+
+    for ip in range(tplevels):
+        for it in range(ttlevels):
+            for ic in range(clevels):
+                n = ip * ttlevels * clevels + it * clevels + ic
+                M[n, n] = tp[ip] + tt[it] + ic * fc
+
+    eigenvalues, eigenvectors = eigh(M)
+
+    eigenvectors, eigenvalues = eigenvectors[::-1], eigenvalues[::-1]
+
+    pairs = []
+
+    for i in range(tplevels * ttlevels * clevels):
+        for j in range(tplevels * ttlevels * clevels):
+            if (
+                    np.round(eigenvalues[i] - eigenvalues[j], 5) == np.round(tp[1], 5) and
+                    eigenvalues[j] in tt
+            ):
+                pairs.append((i, j))
+
+    M2 = np.copy(M)
+
+    # Nested loops to update M2 based on the given conditions
+    for ip in range(tplevels):
+        for it in range(ttlevels):
+            for ic in range(clevels):
+                n = ip * ttlevels * clevels + it * clevels + ic
+                for jp in range(tplevels):
+                    for jt in range(ttlevels):
+                        for jc in range(clevels):
+                            m = jp * ttlevels * clevels + jt * clevels + jc
+
+                            # Approximation for the interaction terms
+                            ME = (
+                                    (jp == ip) * (jt == it + 1) * (jc == ic - 1) *
+                                    np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g * np.sqrt(jc + 1) +
+                                    (jp == ip) * (jt == it - 1) * (jc == ic + 1) *
+                                    np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g * np.sqrt(jc) +
+                                    (jt == it) * (jp == ip + 1) * (jc == ic - 1) *
+                                    np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g * np.sqrt(jc + 1) +
+                                    (jt == it) * (jp == ip - 1) * (jc == ic + 1) *
+                                    np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g * np.sqrt(jc)
+                            )
+
+                            M2[n, m] += ME
+
+    eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
+    eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
+    # Define the eigenvalue differences for specific transitions
+    differences = []
+
+    for i in range(1,6):
+        diff = eigenvalues_M2[pairs[ttlevels-i][0]] - eigenvalues_M2[pairs[ttlevels - i][1]]
+        differences.append(diff)
+
+    anharmonicity = []
+    for i in range(1, len(differences)):
+        d = differences[i] - differences[i-1]
+        anharmonicity.append(d)
+    return sum(anharmonicity)
 
