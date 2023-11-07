@@ -5,15 +5,6 @@ from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
-EJp = 15000
-ECp = 150
-EJt = 20000
-ECt = 200
-g = 150
-fc = 7500
-
-# anharm = return_differences(EJt, ECt, EJp, ECp, g, fc)
-# print(anharm)
 
 def to_minimize(params):
     EJt, ECt, EJp, ECp, g, fc = params

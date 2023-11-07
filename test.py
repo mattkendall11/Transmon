@@ -60,9 +60,9 @@ def egtrans(ng, EjEc, cutoff):
     return e2 - e2[0], de - de[0], g, dg
 
 def return_differences(EJt, ECt, EJp, ECp, g, fc):
-    tplevels = 7
-    ttlevels = 7
-    clevels = 7
+    tplevels = 4
+    ttlevels = 4
+    clevels = 4
 
     ec, ej = ECp / 1000, EJp / 1000
 
@@ -125,7 +125,7 @@ def return_differences(EJt, ECt, EJp, ECp, g, fc):
     # Define the eigenvalue differences for specific transitions
     differences = []
 
-    for i in range(1,6):
+    for i in range(1,clevels+1):
         diff = eigenvalues_M2[pairs[ttlevels-i][0]] - eigenvalues_M2[pairs[ttlevels - i][1]]
         differences.append(diff)
 
@@ -135,3 +135,38 @@ def return_differences(EJt, ECt, EJp, ECp, g, fc):
         anharmonicity.append(d)
     return sum(anharmonicity)
 
+x = np.linspace(10,1000,100)
+y = np.linspace(10,1000,100)
+z = []
+for i in tqdm(range(100)):
+    z1 = []
+    for j in range(100):
+        z0 = return_differences(20000, x[i], 15000, y[j],150, 7500)
+        z1.append(np.abs(z0))
+    z.append(z1)
+
+
+z = np.array(z)
+np.savetxt('z_vals_Ect_Ecp.txt', z)
+z = np.loadtxt('z_vals_Ect_Ecp.txt')
+
+#magnitudes = np.linalg.norm(z, axis=0)  # You can choose axis=1 for row-wise magnitudes
+
+# Create x and y coordinates for the contour plot
+#x = np.arange(z.shape[1])
+#y = np.arange(z.shape[0])
+x, y = np.meshgrid(x, y)
+
+# Create a contour plot using magnitudes
+contour = plt.contourf(x, y, z, cmap='viridis')  # You can choose a different colormap
+
+# Add a colorbar
+plt.colorbar(contour)
+
+# Add labels and a title
+plt.xlabel(fr'$Ec_t$ (MHz)')
+plt.ylabel(fr'$Ec_p$ (MHz)')
+plt.title(r'Sum of differences, $\sum \omega_{n+1} - \omega_n$')
+
+# Show the plot
+plt.show()
