@@ -11,15 +11,15 @@ from tqdm.auto import tqdm
 '''
 define variables
 '''
-num = 7
+num = 5
 fc = 7500
 clevels = num
 ttlevels = num
 tplevels = num
-EJp = 15000
-ECp = 150
-EJt = 20000
-ECt = 200
+EJp = 11800
+ECp = 310
+EJt = 18400
+ECt = 286
 
 ec, ej = ECp/1000, EJp/1000
 
@@ -84,20 +84,16 @@ def offdiagonal(g):
     eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
     eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
     # Define the eigenvalue differences for specific transitions
-    differences = [
-        #eigenvalues[pairs[ttlevels][0]] - eigenvalues[pairs[ttlevels][1]],
-        #eigenvalues_M2[pairs[ttlevels][0]] - eigenvalues_M2[pairs[ttlevels][1]],
-        eigenvalues_M2[pairs[ttlevels - 1][0]] - eigenvalues_M2[pairs[ttlevels - 1][1]],
-        eigenvalues_M2[pairs[ttlevels - 2][0]] - eigenvalues_M2[pairs[ttlevels - 2][1]],
-        eigenvalues_M2[pairs[ttlevels - 3][0]] - eigenvalues_M2[pairs[ttlevels - 3][1]],
-        eigenvalues_M2[pairs[ttlevels - 4][0]] - eigenvalues_M2[pairs[ttlevels - 4][1]],
-        eigenvalues_M2[pairs[ttlevels - 5][0]] - eigenvalues_M2[pairs[ttlevels - 5][1]]
-    ]
+    differences = []
+
+    for i in range(clevels):
+        diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
+        differences.append(diff)
     return differences
 
 
-labels = [rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$', rf'|04$\rangle - |14\rangle$',
-          rf'|05$\rangle - |15\rangle$', rf'|06$\rangle - |16\rangle$']
+#labels = [rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$', rf'|04$\rangle - |14\rangle$',
+          #rf'|05$\rangle - |15\rangle$', rf'|06$\rangle - |16\rangle$']
 g_values = np.linspace(0,150,151)
 push_vals = []
 for g in tqdm(g_values):
@@ -105,7 +101,7 @@ for g in tqdm(g_values):
 push_vals = np.array(push_vals)
 push_vals = push_vals.T
 for i in range(5):
-    plt.plot(g_values, push_vals[i], label = labels[i])
+    plt.plot(g_values, push_vals[i])  #label = labels[i])
 plt.title('transition differences')
 plt.xlabel('coupling constant,g')
 plt.ylabel('MHz')

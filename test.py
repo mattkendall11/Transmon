@@ -134,27 +134,26 @@ def return_differences(EJt, ECt, EJp, ECp, g, fc):
         d = differences[i] - differences[i-1]
         anharmonicity.append(d)
     return sum(anharmonicity)
+'''
+change the x and y for each variable you vary and change its locations in the loop
 
-x = np.linspace(10,1000,100)
-y = np.linspace(10,1000,100)
+'''
+x = np.linspace(1000,40000,100)
+y = np.linspace(10,40000,100)
 z = []
 for i in tqdm(range(100)):
     z1 = []
     for j in range(100):
-        z0 = return_differences(20000, x[i], 15000, y[j],150, 7500)
+        z0 = return_differences(x[i], 100, y[i], 100,150, 7500)# change this for each one
         z1.append(np.abs(z0))
     z.append(z1)
 
 
 z = np.array(z)
-np.savetxt('z_vals_Ect_Ecp.txt', z)
-z = np.loadtxt('z_vals_Ect_Ecp.txt')
+np.savetxt('z_vals_Ejt_Ejp.txt', z)
+z = np.loadtxt('z_vals_Ejt_Ejp.txt')
 
-#magnitudes = np.linalg.norm(z, axis=0)  # You can choose axis=1 for row-wise magnitudes
 
-# Create x and y coordinates for the contour plot
-#x = np.arange(z.shape[1])
-#y = np.arange(z.shape[0])
 x, y = np.meshgrid(x, y)
 
 # Create a contour plot using magnitudes
@@ -164,8 +163,8 @@ contour = plt.contourf(x, y, z, cmap='viridis')  # You can choose a different co
 plt.colorbar(contour)
 
 # Add labels and a title
-plt.xlabel(fr'$Ec_t$ (MHz)')
-plt.ylabel(fr'$Ec_p$ (MHz)')
+plt.xlabel(fr'$Ej_t$ (MHz)')
+plt.ylabel(fr'$Ej_p$ (MHz)')
 plt.title(r'Sum of differences, $\sum \omega_{n+1} - \omega_n$')
 
 # Show the plot
