@@ -50,7 +50,7 @@ for i in range(tplevels*ttlevels*clevels):
             eigenvalues[j] in tt
         ):
             pairs.append((i,j))
-
+print(pairs)
 
 
 def offdiagonal(g):

@@ -1,67 +1,106 @@
 import numpy as np
-from scipy.sparse import diags, spdiags
-from scipy.sparse.linalg import eigs
-from scipy.interpolate import InterpolatedUnivariateSpline
+import matplotlib.pyplot as plt
 
-'''
-collection of functions useful for transmon simulations, OOP not required as translated from 
-mathematica
-'''
+from test import egtrans
+from scipy.linalg import eigh
+from tqdm.auto import tqdm
 
-def egtrans(ng, EjEc, cutoff):
-    if cutoff <= 1:
-        print("Error: cutoff must be greater than 1")
-        return None
+num = 5
+clevels = num
+ttlevels = num
+tplevels = num
+EJp = 11800
+ECp = 310
+EJt = 18400
+ECt = 286
 
-    # Define 'h' as a diagonal matrix
-    h = 4 * (np.arange(-cutoff, cutoff + 1) - ng)**2 * np.eye(2 * cutoff + 1)
+ec, ej = ECp/1000, EJp/1000
 
-    # Define 'hv' as a sparse matrix
-    hv = -np.eye(2 * cutoff + 1)
-    for i in range(2 * cutoff):
-        hv[i, i + 1] = -1.0
-        hv[i + 1, i] = -1.0
+tp = 1000*ec*egtrans(0.5, ej/ec, 15)[0][0:tplevels]
 
-    # Define 'n' as a diagonal matrix
-    n = np.diag(np.arange(-cutoff, cutoff + 1))
+ec, ej = ECt/1000, EJt/1000
 
-    # Calculate eigenvalues and eigenvectors
-    e, v = np.linalg.eig(h + EjEc * hv / 2)
+tt = 1000*ec*egtrans(0.5,ej/ec,15)[0][0:ttlevels]
 
-    # Sort eigenvalues and eigenvectors
-    o = np.argsort(e)
-    e2 = e[o]
-    v2 = v[:, o]
+M = np.zeros((tplevels*ttlevels, tplevels * ttlevels ))
 
-    # Calculate 'g' matrix
-    g = np.dot(np.dot(v2, n), v2.T)
+for ip in range(tplevels):
+    for it in range(ttlevels):
+        n = ip * ttlevels  + it
+        M[n,n] = tp[ip] + tt[it]
 
-    # Calculate sign of 'g'
-    sgn = np.sign(g)
-    g = sgn * g
+eigenvalues, eigenvectors = eigh(M)
 
-    # Calculate 'de' and 'dv2'
-    de = np.array([np.dot(v2[:, i], np.dot(hv, v2[:, i])) / 2 for i in range(2 * cutoff + 1)])
-    # Calculate 'dv2' with division by zero check
-    dv2 = np.zeros((2 * cutoff + 1, 2 * cutoff + 1))
-    for i in range(2 * cutoff + 1):
-        for j in range(2 * cutoff + 1):
-            if i == j:
-                dv2[i, j] = 0
-            else:
-                if e2[i] == e2[j]:
-                    dv2[i, j] = 0
-                else:
-                    dv2[i, j] = sum((v2[j, i] * v2[j, i] * np.dot(hv, v2[i, :])) / (e2[i] - e2[j]))
+eigenvectors, eigenvalues = eigenvectors[::-1], eigenvalues[::-1]
 
-    # Convert dv2 to a NumPy array
-    dv2 = np.array(dv2)
+pairs = []
 
-    # Calculate 'dg' matrix
-    dg = sgn * (np.dot(np.dot(dv2, n), v2.T) + np.dot(np.dot(v2, n), dv2.T)) / 2
+for i in range(tplevels**2):
+    for j in range(tplevels**2):
+        if(
+            np.round(eigenvalues[i] - eigenvalues[j],5) == np.round(tp[1],5) and
+            eigenvalues[j] in tt
+        ):
+            pairs.append((i,j))
 
-    # Return results
-    return e2 - e2[0], de - de[0], g, dg
+
+
+def offdiagonal(g):
+    M2 = np.copy(M)
+
+    # Nested loops to update M2 based on the given conditions
+    for ip in range(tplevels):
+        for it in range(ttlevels):
+
+            n = ip * ttlevels  + it
+            for jp in range(tplevels):
+                for jt in range(ttlevels):
+
+                    m = jp * ttlevels + jt
+
+                    # Approximation for the interaction terms
+                    ME = (
+                            (jp == ip) * (jt == it + 1)  *
+                            np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g  +
+                            (jp == ip) * (jt == it - 1)  *
+                            np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g  +
+                            (jt == it) * (jp == ip + 1)  *
+                            np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g  +
+                            (jt == it) * (jp == ip - 1)  *
+                            np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g
+                    )
+
+                    M2[n, m] += ME
+
+
+    eigenvalues_M2, eigenvectors_M2 = np.linalg.eigh(M2)
+    eigenvectors_M2, eigenvalues_M2 = eigenvectors_M2[::-1], eigenvalues_M2[::-1]
+    # Define the eigenvalue differences for specific transitions
+    differences = []
+    for i in range(num):
+        if i == 0:
+            diff = eigenvalues[pairs[i][0]] - eigenvalues[pairs[i][1]]
+        else:
+            diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
+        differences.append(diff)
+    return differences
+
+
+labels = [rf'|00$\rangle - |10\rangle$',rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$',
+          rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$']
+g_values = np.linspace(0,150,500)
+push_vals = []
+for g in tqdm(g_values):
+    push_vals.append(offdiagonal(g))
+push_vals = np.array(push_vals)
+push_vals = push_vals.T
+for i in range(5):
+    plt.plot(g_values, push_vals[i]  ,label = labels[i])
+plt.title('transition differences')
+plt.xlabel('coupling constant,g')
+plt.ylabel('MHz')
+plt.legend()
+plt.show()
 
 
 

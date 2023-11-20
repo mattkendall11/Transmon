@@ -133,39 +133,39 @@ def return_differences(EJt, ECt, EJp, ECp, g, fc):
     for i in range(1, len(differences)):
         d = differences[i] - differences[i-1]
         anharmonicity.append(d)
-    return sum(anharmonicity)
+    return anharmonicity[1]
 '''
 change the x and y for each variable you vary and change its locations in the loop
 
 '''
-x = np.linspace(1000,40000,100)
-y = np.linspace(10,40000,100)
-z = []
-for i in tqdm(range(100)):
-    z1 = []
-    for j in range(100):
-        z0 = return_differences(x[i], 100, y[i], 100,150, 7500)# change this for each one
-        z1.append(np.abs(z0))
-    z.append(z1)
-
-
-z = np.array(z)
-np.savetxt('z_vals_Ejt_Ejp.txt', z)
-z = np.loadtxt('z_vals_Ejt_Ejp.txt')
-
-
-x, y = np.meshgrid(x, y)
-
-# Create a contour plot using magnitudes
-contour = plt.contourf(x, y, z, cmap='viridis')  # You can choose a different colormap
-
-# Add a colorbar
-plt.colorbar(contour)
-
-# Add labels and a title
-plt.xlabel(fr'$Ej_t$ (MHz)')
-plt.ylabel(fr'$Ej_p$ (MHz)')
-plt.title(r'Sum of differences, $\sum \omega_{n+1} - \omega_n$')
-
-# Show the plot
-plt.show()
+# x = np.linspace(1000,40000,100)
+# y = np.linspace(10,4000,100)
+# z = []
+# for i in tqdm(range(100)):
+#     z1 = []
+#     for j in range(100):
+#         z0 = return_differences(x[i], y[i], 11800, 310,150, 7500)# change this for each one
+#         z1.append(np.abs(z0))
+#     z.append(z1)
+#
+#
+# z = np.array(z)
+# np.savetxt('z_vals_Ejt_Ect.txt', z)
+# z = np.loadtxt('z_vals_Ejt_Ect.txt')
+#
+#
+# x, y = np.meshgrid(x, y)
+#
+# # Create a contour plot using magnitudes
+# contour = plt.contourf(x, y, z, cmap='viridis')  # You can choose a different colormap
+#
+# # Add a colorbar
+# plt.colorbar(contour)
+#
+# # Add labels and a title
+# plt.xlabel(fr'$Ej_t$ (MHz)')
+# plt.ylabel(fr'$Ec_t$ (MHz)')
+# plt.title(r'Push, $\sum |0\rangle to |1\rangle$')
+#
+# # Show the plot
+# plt.show()

@@ -7,14 +7,14 @@ from scipy.optimize import minimize
 
 
 def to_minimize(params):
-    EJt, ECt, EJp, ECp, g, fc = params
-    x = return_differences(EJt, ECt, EJp, ECp, g, fc)
+    EJt, ECt, g, fc = params
+    x = return_differences(EJt, ECt, 11800, 310, g, fc)
     return -x  # We minimize the negative of x to maximize x
 
 # Initial guess for the parameter values
-initial_guess = [20000, 200, 20000, 150, 150, 7500]
-
-result = minimize(to_minimize, initial_guess)
+initial_guess = [18400, 286, 150, 7500]
+bounds = [(0,40000), (0,1000), (150,400), (0, 10000)]
+result = minimize(to_minimize, initial_guess, bounds = bounds)
 
 # Extract the optimized parameter values and the maximum x
 optimal_params = result.x
