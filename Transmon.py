@@ -64,9 +64,9 @@ def offdiagonal(g):
                             (jp == ip) * (jt == it - 1)  *
                             np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g*np.sqrt(jp)* (EJp / (8 * ECp)) ** (1 / 4) +
                             (jt == it) * (jp == ip + 1)  *
-                            np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jp+1)* (EJt / (8 * ECt)) ** (1 / 4)  +
+                            np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jt+1)* (EJt / (8 * ECt)) ** (1 / 4)  +
                             (jt == it) * (jp == ip - 1)  *
-                            np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jp)* (EJp / (8 * ECp)) ** (1 / 4)
+                            np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jt)* (EJp / (8 * ECp)) ** (1 / 4)
                     )
                     M2[n, m] += ME
 
@@ -87,7 +87,7 @@ def offdiagonal(g):
 
 labels = ['bare',rf'|00$\rangle - |10\rangle$',rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$',
           rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$']
-g_values = np.linspace(0,150,500)
+g_values = np.linspace(0,300,500)
 push_vals = []
 for g in tqdm(g_values):
     push_vals.append(offdiagonal(g))
