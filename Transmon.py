@@ -6,12 +6,11 @@ from scipy.linalg import eigh
 from tqdm.auto import tqdm
 
 num = 5
-clevels = num
 ttlevels = num
 tplevels = num
-EJp = 11800
+EJp = 20000
 ECp = 310
-EJt = 18400
+EJt = 30000
 ECt = 286
 
 ec, ej = ECp/1000, EJp/1000
@@ -61,15 +60,14 @@ def offdiagonal(g):
                     # Approximation for the interaction terms
                     ME = (
                             (jp == ip) * (jt == it + 1)  *
-                            np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g  +
+                            np.sqrt((it + 1) / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g*np.sqrt(jp+1)*(EJp / (8 * ECp)) ** (1 / 4)  +
                             (jp == ip) * (jt == it - 1)  *
-                            np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g  +
+                            np.sqrt(it / 2) * (EJt / (8 * ECt)) ** (1 / 4) * g*np.sqrt(jp)* (EJp / (8 * ECp)) ** (1 / 4) +
                             (jt == it) * (jp == ip + 1)  *
-                            np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g  +
+                            np.sqrt((ip + 1) / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jp+1)* (EJt / (8 * ECt)) ** (1 / 4)  +
                             (jt == it) * (jp == ip - 1)  *
-                            np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g
+                            np.sqrt(ip / 2) * (EJp / (8 * ECp)) ** (1 / 4) * g*np.sqrt(jp)* (EJp / (8 * ECp)) ** (1 / 4)
                     )
-
                     M2[n, m] += ME
 
 
@@ -83,10 +81,11 @@ def offdiagonal(g):
         else:
             diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
         differences.append(diff)
+
     return differences
 
 
-labels = [rf'|00$\rangle - |10\rangle$',rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$',
+labels = ['bare',rf'|00$\rangle - |10\rangle$',rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$', rf'|03$\rangle - |13\rangle$',
           rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$']
 g_values = np.linspace(0,150,500)
 push_vals = []
