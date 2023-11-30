@@ -5,7 +5,7 @@ adapted from the plots files provided by andreas
 import numpy as np
 import matplotlib.pyplot as plt
 from itertools import chain
-from test import egtrans
+from functions import egtrans
 from scipy.linalg import eigh
 from tqdm.auto import tqdm
 '''
