@@ -102,14 +102,17 @@ def offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, eigenvalues
 
     # Define the eigenvalue differences for specific transitions
     differences = []
+    # for i in range(ttlevels):
+    #     if i == 0:
+    #         diff = eigenvalues[pairs[i][0]] - eigenvalues[pairs[i][1]]
+    #     else:
+    #         diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
+    #     differences.append(diff)
     for i in range(ttlevels):
-        if i == 0:
-            diff = eigenvalues[pairs[i][0]] - eigenvalues[pairs[i][1]]
-        else:
-            diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
-        differences.append(diff)
 
-    return differences
+        diff = eigenvalues_M2[pairs[i][0]] - eigenvalues_M2[pairs[i][1]]
+        differences.append(diff)
+    return differences[::-1]
 
 
 def return_differences(EJt, ECt, EJp, ECp, g, tplevels, ttlevels):

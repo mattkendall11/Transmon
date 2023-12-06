@@ -5,11 +5,12 @@ from scipy.linalg import eigh
 from tqdm.auto import tqdm
 
 
-ttlevels = 5  # target transmon number of energy levels
-tplevels = 5  # probe transmon number of energy levels
-EJp = 20000  # probe transmon Junction Energy (MHz)
-ECp = 310  # probe transmon Capacitor Energy (MHz)
-EJt = 30000  # target transmon Junction Energy (MHz)
+ttlevels = 6  # target transmon number of energy levels
+tplevels = 6  # probe transmon number of energy levels
+EJp = 11800
+ECp = 310
+# probe transmon Capacitor Energy (MHz)
+EJt = 18400  # target transmon Junction Energy (MHz)
 ECt = 286  # target transmon Capacitor Energy (MHz)
 
 
@@ -40,17 +41,17 @@ def display(EJp, ECp, EJt, ECt, g_line, tplevels, ttlevels):
                 pairs.append((i, j))
 
 
-    labels = ['bare', rf'|00$\rangle - |10\rangle$', rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$',
+    labels = [rf'|00$\rangle - |10\rangle$', rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$',
               rf'|03$\rangle - |13\rangle$',
               rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$']
-    g_values = np.linspace(0, 300, 300)
+    g_values = np.linspace(0, 250, 300)
     push_vals = []
     for g in tqdm(g_values):
         push_vals.append(offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, eigenvalues))
     push_vals = np.array(push_vals)
     yrange = (min(push_vals[-1])*1.01, max(push_vals[-1])*1.01)
     push_vals = push_vals.T
-    for i in range(ttlevels):
+    for i in range(ttlevels-1):
         plt.plot(g_values, push_vals[i], label=labels[i])
     if g_line:
         plt.plot([g_line]*100, np.linspace(yrange[0], yrange[1], 100), label='g')

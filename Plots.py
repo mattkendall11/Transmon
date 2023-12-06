@@ -20,7 +20,6 @@ EJp = 11800
 ECp = 310
 EJt = 18400
 ECt = 286
-
 ec, ej = ECp/1000, EJp/1000
 
 tp = 1000*ec*egtrans(0.5, ej/ec, 15)[0][0:tplevels]
