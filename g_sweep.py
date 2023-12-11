@@ -5,13 +5,13 @@ from scipy.linalg import eigh
 from tqdm.auto import tqdm
 
 
-ttlevels = 6  # target transmon number of energy levels
-tplevels = 6  # probe transmon number of energy levels
+ttlevels = 5  # target transmon number of energy levels
+tplevels = 5  # probe transmon number of energy levels
 EJp = 11800
 ECp = 310
 # probe transmon Capacitor Energy (MHz)
 EJt = 18400  # target transmon Junction Energy (MHz)
-ECt = 286  # target transmon Capacitor Energy (MHz)
+ECt = 280  # target transmon Capacitor Energy (MHz)
 
 
 def display(EJp, ECp, EJt, ECt, g_line, tplevels, ttlevels):
@@ -43,7 +43,7 @@ def display(EJp, ECp, EJt, ECt, g_line, tplevels, ttlevels):
 
     labels = [rf'|00$\rangle - |10\rangle$', rf'|01$\rangle - |11\rangle$', rf'|02$\rangle - |12\rangle$',
               rf'|03$\rangle - |13\rangle$',
-              rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$']
+              rf'|04$\rangle - |14\rangle$', rf'|05$\rangle - |15\rangle$', rf'|06$\rangle - |16\rangle$']
     g_values = np.linspace(0, 250, 300)
     push_vals = []
     for g in tqdm(g_values):

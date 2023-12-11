@@ -115,7 +115,7 @@ def offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, eigenvalues
     return differences[::-1]
 
 
-def return_differences(EJt, ECt, EJp, ECp, g, tplevels, ttlevels):
+def return_differences(EJt, ECt, EJp, ECp, g, ttlevels, tplevels):
     # calculate energy differences to ground state for probe and target transmon states
     tp = ECp * egtrans(0.5, EJp / ECp, 15)[0][0:tplevels]
     tt = ECt * egtrans(0.5, EJt / ECt, 15)[0][0:ttlevels]

@@ -1,7 +1,7 @@
 from functions import return_differences
 import numpy as np
 import matplotlib.pyplot as plt
-EJp  = 19000
+EJp = 19000
 ECp = 350
 
 EJt = np.linspace(8000,25000,100)

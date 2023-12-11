@@ -19,13 +19,13 @@ initial_guess = {
 bounds = {
     'EJt': (100, 40000),
     'ECt': (10, 1000),
-    'g': (150, 400),
+    'g': (100, 150),
 }
 
 
 def to_minimize(params):
     EJt, ECt, g = params
-    x = return_differences(EJt, ECt, EJp, ECp, g, tplevels, ttlevels)
+    x = return_differences(EJt, ECt, EJp, ECp, g, ttlevels, tplevels)
     return -x  # We minimize the negative of x to maximize x
 
 
@@ -56,7 +56,7 @@ def create_heatmap(param1, param2):
     for i in tqdm(range(40)):
         z1 = []
         for j in range(40):
-            z0 = return_differences(get_param('EJt', i), get_param('ECt', j), EJp, ECp, get_param('g', i), tplevels, ttlevels)
+            z0 = return_differences(get_param('EJt', i), get_param('ECt', j), EJp, ECp, get_param('g', i), ttlevels, tplevels)
             z1.append(np.abs(z0))
         z.append(z1)
 
