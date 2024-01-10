@@ -1,5 +1,4 @@
-import numpy as np
-from functions import egtrans, offdiagonal
+from direct_coupling_functions import *
 from scipy.linalg import eigh
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -39,7 +38,7 @@ for i in range(tplevels ** 2):
         ):
             pairs.append((i, j))
 
-M2 = offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, eigenvalues, True)
+M2 = offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, True)
 print(M2)
 
 # Create a heatmap

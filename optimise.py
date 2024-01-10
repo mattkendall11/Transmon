@@ -1,5 +1,4 @@
-from functions import return_differences
-from g_sweep import display
+from direct_coupling_functions import *
 from scipy.optimize import minimize
 import numpy as np
 from tqdm.auto import tqdm
@@ -17,8 +16,8 @@ initial_guess = {
 }
 
 bounds = {
-    'EJt': (100, 40000),
-    'ECt': (10, 1000),
+    'EJt': (15000, 25000),
+    'ECt': (200, 600),
     'g': (100, 150),
 }
 
@@ -109,6 +108,6 @@ def load_heatmap(param1, param2):
     plt.show()
 
 if __name__ == '__main__':
-    optimise_params()
-    #create_heatmap('ECt', 'g')
+    #optimise_params()
+    create_heatmap('ECt', 'g')
     #load_heatmap('ECt', 'g')

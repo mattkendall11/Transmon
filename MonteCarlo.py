@@ -1,9 +1,7 @@
-import numpy as np
-from functions import return_differences
-from tqdm.auto import tqdm
 from scipy.stats import truncnorm
-from g_sweep import display
-
+from cavity_coupling_functions import *
+from direct_coupling_functions import *
+import sys
 
 ttlevels = 5  # target transmon number of energy levels
 tplevels = 5  # probe transmon number of energy levels
@@ -11,33 +9,39 @@ tplevels = 5  # probe transmon number of energy levels
 initial_guess = {
     'EJt': 20000,   # Junction Energy of target transmon (MHz)
     'ECt': 400,     # Capacitor Energy of target transmon (MHz)
-                    # Initial target transmon frequency 5.7 MHz
+                    # Initial target transmon frequency 7.6 MHz
     'EJp': 15000,   # Junction Energy of probe transmon (MHz)
     'ECp': 300,     # Capacitor Energy of probe transmon (Mhz)
-                    # Initial probe transmon frequency 7.6 MHz
+                    # Initial probe transmon frequency 5.7 MHz
     'g': 120,       # Coupling constant   ***
 }
 
 bounds = {
     'EJt': (15000, 25000),
     'ECt': (200, 600),
-    # Target transmon frequency range: 2.73 - 7.6 MHz
+    # Target transmon frequency range: 4.69 - 10.35 MHz
     'EJp': (10000, 20000),
     'ECp': (100, 400),
-    # Probe transmon frequency range: 4.69 - 10.35 MHz
-    'g': (100, 250),
+    # Probe transmon frequency range: 2.73 - 7.6 MHz
+    'g': (100, 150),
 }
 
 
 def constrain(params):
     EJt, ECt, EJp, ECp, g = params
     wt = ((8 * EJt * ECt) ** 0.5 - ECt)/1000  # target transmon frequency in GHz
+    #print(wt)
     if not 4 <= wt <= 8:
         return False
     wp = ((8 * EJp * ECp) ** 0.5 - ECp) / 1000  # probe transmon frequency in GHz
+    #print(wp)
     if not 4 <= wp <= 8:
         return False
-    if not 1 <= wp - wt <= 2:
+    if not 1 <= wt - wp <= 2:
+        return False
+    if not 50 <= EJp / ECp <= 100:
+        return False
+    if not 50 <= EJt / ECt <= 100:
         return False
     return True
 
@@ -56,33 +60,49 @@ def acceptance_func(delx, T):
 
 def cooling_function(step):
     initial_search_range = 1
-    search_range_decrement = 0.99
-    initial_temperature = 30
-    temperature_decrement = 0.99
+    search_range_decrement = 0.999
+    initial_temperature = 1
+    temperature_decrement = 0.999
     return initial_search_range * search_range_decrement ** step, initial_temperature * temperature_decrement ** step
 
 
-def MonteCarlo(no_samples):
-    result = initial_guess
-    cost = return_differences(*initial_guess.values(), ttlevels, tplevels)
+def MonteCarlo(no_samples, direct_or_indirect_coupling):
+    function_to_use = return_differences if direct_or_indirect_coupling else return_differences_cavity_coupling
+
+    curr_step = initial_guess
+    curr_step['cost'] = function_to_use(*initial_guess.values(), ttlevels, tplevels)
+    result = curr_step
+    cost_lst = [curr_step['cost']]
     for step in tqdm(range(no_samples)):
         search_range, temperature = cooling_function(step)
         while True:
             next_step = {}
             for var in ['EJt', 'ECt', 'EJp', 'ECp', 'g']:
-                next_step[var] = gaussian(result[var], search_range * (bounds[var][1] - bounds[var][0]), bounds[var][0], bounds[var][1])
+                next_step[var] = gaussian(curr_step[var], search_range * (bounds[var][1] - bounds[var][0]), bounds[var][0], bounds[var][1])
             if constrain(next_step.values()):
                 break
-        new_cost = return_differences(*result.values(), ttlevels, tplevels)
-        if acceptance_func(cost - new_cost, temperature):
-            result = next_step
-            cost = new_cost
-    return result, cost
+        next_step['cost'] = function_to_use(*next_step.values(), ttlevels, tplevels)
+        if acceptance_func(curr_step['cost'] - next_step['cost'], temperature):
+            curr_step = next_step
+            cost_lst.append(curr_step['cost'])
+            if curr_step['cost'] > result['cost']:
+                result = curr_step
+    # print(search_range, temperature)
+    return result, cost_lst
 
 
 if __name__ == '__main__':
-    result, cost = MonteCarlo(1000)
-    print(result)
-    print(cost)
-    # print(return_differences(18404.25049977,   161.86999255, 11800, 310, 150, 5, 5))
-    # display(18404.25049977,   161.86999255, 11800, 310, 150, 5, 5)
+    """
+    run monte carlo simulations from command prompt using system arguments
+    open cmmd prompt go to the folder storing the project with cd "path to folder"
+    type: 
+    python MonteCarlo.py 5000 direct
+    5000 is the first argument and is no of samples
+    direct is second argument and is wheter you use direct or indirect coupling
+    make sure python is in the PATH variable
+    """
+
+    res, cost = MonteCarlo(int(sys.argv[1]), (sys.argv[2] == 'direct'))
+    print(res)
+
+

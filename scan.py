@@ -1,4 +1,4 @@
-from functions import return_differences
+from direct_coupling_functions import return_differences
 import numpy as np
 import matplotlib.pyplot as plt
 EJp = 19000
