@@ -43,6 +43,15 @@ def constrain(params):
         return False
     if not 50 <= EJt / ECt <= 100:
         return False
+    EjtEct = EJt/ECt
+    EjpEcp = EJp/ECp
+    if not 20<= EjtEct<= 70:
+        return False
+    if not 20<= EjpEcp<= 70:
+        return False
+    if not 100<=g<=150:
+        return False
+
     return True
 
 

@@ -1,8 +1,9 @@
 from direct_coupling_functions import return_differences
 import numpy as np
 import matplotlib.pyplot as plt
-EJp = 19000
-ECp = 350
+
+EJp = 10000
+ECp = 200
 
 EJt = np.linspace(8000,25000,100)
 ECt = np.linspace(150,400,100)
@@ -54,9 +55,9 @@ ft = []
 for f in freqs:
     ft.append(f[1])
 
-plt.plot(ejec,push_vals, '+')
+plt.plot(ej,push_vals, '+')
 plt.title(fr'Probe frequency : {probe_frequency}')
-plt.xlabel('EJ/EC')
+plt.xlabel('EJ')
 plt.ylabel('y (MHz)')
 plt.show()
 
