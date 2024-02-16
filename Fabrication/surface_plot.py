@@ -1,6 +1,4 @@
-from functions import return_differences
 import numpy as np
-import matplotlib.pyplot as plt
 
 EJp = 15455.75
 ECp = 220.42

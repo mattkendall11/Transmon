@@ -1,4 +1,4 @@
-from direct_coupling_functions import *
+from Monte_Carlo.direct_coupling_functions import *
 from scipy.linalg import eigh
 import matplotlib.pyplot as plt
 import seaborn as sns

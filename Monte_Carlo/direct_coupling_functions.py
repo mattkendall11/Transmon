@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from functions import *
+from Monte_Carlo.functions import *
 from scipy.linalg import eigh
 from tqdm.auto import tqdm
 

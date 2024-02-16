@@ -1,6 +1,6 @@
 from scipy.stats import truncnorm
-from cavity_coupling_functions import *
-from direct_coupling_functions import *
+from Monte_Carlo.cavity_coupling_functions import *
+from Monte_Carlo.direct_coupling_functions import *
 import sys
 
 ttlevels = 5  # target transmon number of energy levels

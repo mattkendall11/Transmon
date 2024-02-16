@@ -1,4 +1,4 @@
-from direct_coupling_functions import *
+from Monte_Carlo.direct_coupling_functions import *
 from scipy.optimize import minimize
 import numpy as np
 from tqdm.auto import tqdm
