@@ -18,10 +18,11 @@ y = df['Y-Coordinate'].to_numpy()
 r = np.sqrt(x*x+y*y)
 Rn = 1/conductance
 
-# plt.plot(width, Rn, '+')
-# plt.xlabel('JJ width top electrode')
-# plt.ylabel(fr'$R_n$ $\Omega$')
-# plt.show()
+plt.plot(width, Rn, '+')
+plt.xlabel('JJ width top electrode')
+plt.ylabel(fr'$R_n$ $\Omega$')
+plt.savefig('your_plot.svg', format='svg')
+plt.show()
 
 # Combine features
 features = np.column_stack((r, width))
