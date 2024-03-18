@@ -1,12 +1,20 @@
 import numpy as np
 from scipy.special import ellipk
+'''
 
+script to estimate resonant values of resonators
+'''
 mu0 = 1.256e-6
 eps0 = 8.85e-12
-epseff = 12.7/2#11.7#
+epseff = 5.5#11.7#permitivity
 
-w, gap, nturns, lcap, lmeander, r, ltail = 30, 15, 6, 50, 490, 60,100
-
+w, gap, nturns, lcap, lmeander, r, ltail = 30, 10, 8, 50, 490, 75, 0
+'''
+w = width
+nturns = number of full turns
+lcap = dont change
+l tail = dont change
+'''
 l = lcap +  ltail + nturns*(lmeander + r*np.pi) + np.pi/2*r
 l*=1e-6
 
