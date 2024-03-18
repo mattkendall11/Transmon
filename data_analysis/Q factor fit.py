@@ -36,7 +36,8 @@ def ret_phase(f, S21, Q, f0, delx, dely, theta, m, n):
 class Qfactor:
     def __init__(self, path):
         self.freq = np.loadtxt(path + 'freqs.txt')
-        self.powers = np.loadtxt(path + 'powers.txt')
+        mag_csv = pd.read_csv(path + 'mags.csv', header=None)
+        self.powers = np.loadtxt(path + 'powers.txt')[:len(mag_csv)]
         self.mag = [np.array(pd.read_csv(path + 'mags.csv', header=None).iloc[index, :].tolist()) for index in range(len(self.powers))]
         self.phase = [np.array(pd.read_csv(path + 'phases.csv', header=None).iloc[index, :].tolist()) for index in range(len(self.powers))]
         self.res_mag = []
@@ -48,7 +49,7 @@ class Qfactor:
         Qi_err = []
         for index in range(len(self.powers)):
             mag = self.mag[index]
-            phase = self.mag[index]
+            phase = self.phase[index]
 
             for i in range(int(len(phase) / 2) + 1, len(phase)):
                 if phase[i] - phase[i - 1] > 5:
@@ -150,12 +151,15 @@ if __name__ == '__main__':
     # path = 'data/5.36 peak/251 pts 200 band 5e6 span 1000 avg/'
     # path = 'data/5.36 peak/501 pts 100 band 2.5e6 span 200 avg/'
     # path = 'data/5.36 peak/501 pts 500 band 2e6 span 200 avg/'
-    path = 'data/5.36 peak/501 pts 500 band 5e6 span 200 avg/'
+    # path = 'data/5.36 peak/501 pts 500 band 5e6 span 200 avg/'
     # path = 'data/5.36 peak/501 pts 500 band 5e7 span 200 avg/'
     # path = 'data/5.36 peak/1001 pts 100 band 2.5e6 span 200 avg/'
+    # path = 'data/5.83 peak/251 pts 100 band 7e6 span 100 avg/'
+    # path = 'data/5.83 peak/251 pts 500 band 1e7 span 20 avg/'
+    path = 'data/5.83 peak/501 pts 100 band 5e6 span 100 avg/'
 
 
     Q1 = Qfactor(path)
-    Q1.fit([1e4, 3, 1, 0])
-    Q1.initial_params(3, [1e4, 3, 1, 0])
-    Q1.display(3)
+    Q1.fit([1e4, 10, 3, 0])
+    Q1.initial_params(0, [1e4, 10, 3, 0])
+    Q1.display(0)
