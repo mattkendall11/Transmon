@@ -127,10 +127,13 @@ class Qfactor:
 
         plt.plot(self.freq, mag, 'ro')
         plt.plot(self.freq, ret_mag(self.freq, *res_mag), 'b-')
+        plt.xlabel('Frequency (GHz)')
+        plt.ylabel('Magnitude (dB)')
         plt.show()
 
         plt.plot(self.freq, phase, 'ro')
         plt.plot(self.freq, ret_phase(self.freq, *res_phase), 'b-')
+
         plt.show()
 
         mag -= res_mag[-2] * self.freq
@@ -149,17 +152,18 @@ class Qfactor:
 if __name__ == '__main__':
     # path = 'data/5.36 peak/251 pts 200 band 2e6 span 2000 avg/'
     # path = 'data/5.36 peak/251 pts 200 band 5e6 span 1000 avg/'
-    # path = 'data/5.36 peak/501 pts 100 band 2.5e6 span 200 avg/'
+    path = 'data/5.36 peak/501 pts 100 band 2.5e6 span 200 avg/'
     # path = 'data/5.36 peak/501 pts 500 band 2e6 span 200 avg/'
     # path = 'data/5.36 peak/501 pts 500 band 5e6 span 200 avg/'
     # path = 'data/5.36 peak/501 pts 500 band 5e7 span 200 avg/'
     # path = 'data/5.36 peak/1001 pts 100 band 2.5e6 span 200 avg/'
+    # path = 'data/5.36 peak/1001 pts 100 band 2.5e6 span 200 avg/'m
     # path = 'data/5.83 peak/251 pts 100 band 7e6 span 100 avg/'
     # path = 'data/5.83 peak/251 pts 500 band 1e7 span 20 avg/'
-    path = 'data/5.83 peak/501 pts 100 band 5e6 span 100 avg/'
+    # path = 'data/5.83 peak/501 pts 100 band 5e6 span 100 avg/'
 
 
     Q1 = Qfactor(path)
     Q1.fit([1e4, 10, 3, 0])
-    Q1.initial_params(0, [1e4, 10, 3, 0])
-    Q1.display(0)
+    # Q1.initial_params(0, [1e4, 10, 3, 0])
+    Q1.display(13)

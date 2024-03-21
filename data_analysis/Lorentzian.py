@@ -17,6 +17,7 @@ def fit_lorentzian(x_data, y_data):
     return parameters
 
 # Example data (replace this with your actual data)
+
 x_data = np.loadtxt('freqs.txt')
 y_data = np.loadtxt('mag.txt')
 
