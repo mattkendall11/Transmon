@@ -47,10 +47,10 @@ def offdiagonal(g, M, tplevels, ttlevels, EJp, ECp, EJt, ECt, pairs, return_M2=F
     return differences[::-1]
 
 
-def return_differences(EJt, ECt, EJp, ECp, g, ttlevels, tplevels):
+def return_differences(EJt, ECt, EJp, ECp, g, ttlevels, tplevels, ng=0.5):
     # calculate energy differences to ground state for probe and target transmon states
-    tp = ECp * egtrans(0.5, EJp / ECp, 15)[0][0:tplevels]
-    tt = ECt * egtrans(0.5, EJt / ECt, 15)[0][0:ttlevels]
+    tp = ECp * egtrans(ng, EJp / ECp, 15)[0][0:tplevels]
+    tt = ECt * egtrans(ng, EJt / ECt, 15)[0][0:ttlevels]
 
     M = np.zeros((tplevels * ttlevels, tplevels * ttlevels))
 
@@ -76,10 +76,10 @@ def return_differences(EJt, ECt, EJp, ECp, g, ttlevels, tplevels):
     return differences[0] - differences[1]
 
 
-def display(EJt, ECt, EJp, ECp, g_line, tplevels, ttlevels):
+def display(EJt, ECt, EJp, ECp, g_line, tplevels, ttlevels, ng=0.5):
     # calculate energy differences to ground state for probe and target transmon states
-    tp = ECp * egtrans(0.5, EJp / ECp, 15)[0][0:tplevels]
-    tt = ECt * egtrans(0.5, EJt / ECt, 15)[0][0:ttlevels]
+    tp = ECp * egtrans(ng, EJp / ECp, 15)[0][0:tplevels]
+    tt = ECt * egtrans(ng, EJt / ECt, 15)[0][0:ttlevels]
 
     M = np.zeros((tplevels * ttlevels, tplevels * ttlevels))
 
@@ -119,7 +119,7 @@ def display(EJt, ECt, EJp, ECp, g_line, tplevels, ttlevels):
     push_vals = push_vals.T
     for i in range(ttlevels-1):
         plt.plot(g_values, push_vals[i], label=labels[i])
-    plt.title('transition differences')
+    plt.title('Transition Differences')
     plt.xlabel('coupling constant,g')
     plt.ylabel('MHz')
     plt.legend()
@@ -132,10 +132,45 @@ if __name__ == '__main__':
     
     """
 
-    # params = {'EJt': 15006.894040899955, 'ECt': 229.78678377191386, 'EJp': 14264.142311233556, 'ECp': 152.56651873024626, 'g': 149.64530893352173, 'cost': 7.156001451809971}
-    params = {'EJt': 15455.748591219854, 'ECt': 220.4155644397372, 'EJp': 19999.985766746653, 'ECp': 105.3390471812376, 'g': 149.99950419873878, 'cost': 12.820092751541324}
+    params = {'EJt': 15006.894040899955, 'ECt': 229.78678377191386, 'EJp': 14264.142311233556, 'ECp': 152.56651873024626, 'g': 149.64530893352173, 'cost': 7.156001451809971}
+    # params = {'EJt': 15455.748591219854, 'ECt': 220.4155644397372, 'EJp': 19999.985766746653, 'ECp': 105.3390471812376, 'g': 149.99950419873878, 'cost': 12.820092751541324}
     EJt, ECt, EJp, ECp, g, tplevels, ttlevels = params['EJt'], params['ECt'], params['EJp'], params['ECp'], params['g'], 5, 5
-    print(((8 * EJt * ECt) ** 0.5 - ECt)/1000)
-    print(((8 * EJp * ECp) ** 0.5 - ECp)/1000)
-    print(return_differences(EJt, ECt, EJp, ECp, g, tplevels, ttlevels))
-    display(EJt, ECt, EJp, ECp, g, tplevels, ttlevels)
+    # print(((8 * EJt * ECt) ** 0.5 - ECt)/1000)
+    # print(((8 * EJp * ECp) ** 0.5 - ECp)/1000)
+    # print(return_differences(EJt, ECt, EJp, ECp, g, tplevels, ttlevels))
+    # display(EJt, ECt, EJp, ECp, g, tplevels, ttlevels)
+
+    # print(return_differences(150, ECt, EJp, ECp, g, tplevels, ttlevels, 0.05))
+    # display(150, ECt, EJp, ECp, g, tplevels, ttlevels, 0.05)
+
+
+    Ej_array = np.linspace(50, 5000, 200)
+    ng_array = np.linspace(0.001, 0.1, 200)
+    z = np.zeros((200, 200))
+    for i in tqdm(range(200)):
+        for j in range(200):
+            z[i][j] = return_differences(Ej_array[i], ECt, EJp, ECp, g, tplevels, ttlevels, ng_array[j])
+    Ej_array, ng_array = np.meshgrid(Ej_array, ng_array)
+
+    # Create a contour plot using magnitudes
+    contour = plt.contourf(Ej_array, ng_array, z, cmap='viridis')  # You can choose a different colormap
+
+    # Add a colorbar
+    plt.colorbar(contour)
+    # Add labels and a title
+    plt.xlabel('Ej')
+    plt.ylabel('ng')
+    plt.title('Dispersive shift when pulsing Ej and ng')
+    # Show the plot
+    plt.show()
+
+    contour = plt.contourf(Ej_array, ng_array, abs(z), cmap='viridis')  # You can choose a different colormap
+
+    # Add a colorbar
+    plt.colorbar(contour)
+    # Add labels and a title
+    plt.xlabel('Ej')
+    plt.ylabel('ng')
+    plt.title('Dispersive shift when pulsing Ej and ng')
+    # Show the plot
+    plt.show()
